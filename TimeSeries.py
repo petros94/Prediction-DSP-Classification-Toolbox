@@ -37,7 +37,7 @@ def autocorr(data, max_lag, plot = 0):
     autocorrelation = autocov/autocov[0]
 
     if plot != 0:
-        matplotlib.pyplot.figure(3)
+        matplotlib.pyplot.figure("Autocorrelation plot")
         matplotlib.pyplot.title("Autocorrelation plot")
         matplotlib.pyplot.plot(np.array(range(0,max_lag)), autocorrelation)
         margin = 1.96/np.sqrt(max_lag)
@@ -154,7 +154,7 @@ class ARIMA_model:
         if plot_error != 0:
             min_ = len(error) - min(100, len(error))
             max_ = len(error)
-            matplotlib.pyplot.figure(4)
+            matplotlib.pyplot.figure("Predicted and Actual Values")
             matplotlib.pyplot.title("Predicted and Actual Values")
             matplotlib.pyplot.plot(predicted_values[min_ : max_ ], label = "error")
             matplotlib.pyplot.plot(actual_values[min_ : max_ ], label = "error")

@@ -8,18 +8,18 @@ model = ts.ARIMA_model()
 
 
 """Create Timeseries"""
-u = pd.read_csv("/Users/Petros/Desktop/test2.csv")
+u = pd.read_csv("/Users/Petros/Desktop/shampoo.csv")
 
 for i in range(u.index.size):
     u.loc[i, "value"] = (np.random.uniform() - 0.5)
-
-
 x = u.copy()
 y = u.copy()
 
+"""MA process"""
 for i in range(2, u.index.size):
     x.loc[i, "value"] = u.loc[i, "value"] +0.65*u.loc[i-1, "value"] - 0.25*u.loc[i-2, "value"]
 
+"""AR process"""
 for i in range(2, u.index.size):
     y.loc[i, "value"] = -0.7*y.loc[i-1, "value"] + 0.2*y.loc[i-2, "value"] + u.loc[i, "value"]
 
