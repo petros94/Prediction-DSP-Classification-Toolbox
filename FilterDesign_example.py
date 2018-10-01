@@ -16,6 +16,7 @@ low_pass = fd.Butterworth_filter(sampling_period = 0.002,
 """Apply filter"""
 y = low_pass.apply(x)
 
+
 """Plot filtered data"""
 plt.plot(y[1:300])
 plt.plot(x[1:300])
