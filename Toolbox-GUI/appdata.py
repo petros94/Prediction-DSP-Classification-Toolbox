@@ -9,6 +9,6 @@ class FilterDesign_appdata:
     def __init__(self):
         self.data = 0
         self.filtered_data = 0
-        self.filter_applied = 0
+        self.filter_applied = False
         self.filter_type = ""
         self.filter = 0

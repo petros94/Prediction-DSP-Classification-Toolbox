@@ -71,8 +71,18 @@ class FilterDesign_window(tk.Frame):
             self.entry_filter_sampling_rate = tk.Entry(self.master, textvariable = self.entry_filter_sampling_rate_var, justify = "right", width = 12)
             self.entry_filter_sampling_rate.grid(row = 11, column = 1, pady = 5, sticky = "e")
 
+            self.label_filter_dc_gain = tk.Label(self.master, text="DC Gain (V/V):")
+            self.label_filter_dc_gain.grid(row = 12, column = 0, pady = 5)
+            self.entry_filter_dc_gain_var = tk.IntVar(self.master)
+            self.entry_filter_dc_gain_var.set(1)
+            self.entry_filter_dc_gain = tk.Entry(self.master, textvariable = self.entry_filter_dc_gain_var, justify = "right", width = 12)
+            self.entry_filter_dc_gain.grid(row = 12, column = 1, pady = 5, sticky = "e")
+
             self.button_filter_apply = tk.Button(self.master, text = "Apply", command = self.button_filter_apply_click)
-            self.button_filter_apply.grid(row = 12, column = 0, columnspan = 2, pady = 5, sticky = "ew")
+            self.button_filter_apply.grid(row = 13, column = 0, columnspan = 2, pady = 5, sticky = "ew")
+
+            self.label_apply_error = tk.Label(self.master)
+            self.label_apply_error.grid(row = 14, column = 0, columnspan = 2)
 
     """Button click functions"""
     def button_import_data_click(self):
@@ -87,7 +97,7 @@ class FilterDesign_window(tk.Frame):
             self.label_import_error['fg'] = "red"
             return None
 
-        self.label_import_error['text'] = "Data Imported"
+        self.label_import_error['text'] = "Data Imported."
         self.label_import_error['fg'] = "green"
 
     def button_export_data_click(self):
@@ -96,14 +106,34 @@ class FilterDesign_window(tk.Frame):
             return None
 
         try:
-            self.controller.export_data(file_name, self.option_export_data_var)
+            self.controller.export_data(file_name, self.option_export_data_var.get())
         except ValueError as e:
             self.label_export_error['text'] = e
             self.label_export_error['fg'] = "red"
             return None
 
-        self.label_export_error['text'] = "Data Exported"
+        self.label_export_error['text'] = "Data Exported."
         self.label_export_error['fg'] = "green"
 
     def button_filter_apply_click(self):
-        pass
+        try:
+            filter_parameters = {
+                "type": self.option_filter_select_var.get(),
+                "order": self.option_filter_order_var.get(),
+                "cutoff_freq": self.entry_filter_cuttof_freq_var.get(),
+                "sampling_rate": self.entry_filter_sampling_rate_var.get(),
+                "dc_gain": self.entry_filter_dc_gain_var.get()
+            }
+        except tk.TclError as e:
+            self.label_apply_error['text'] = "Invalid Parameters."
+            self.label_apply_error['fg'] = "red"
+            return None
+
+        self.label_apply_error['text'] = ""
+
+        try:
+            self.controller.apply_filter(filter_parameters)
+        except ValueError as e:
+            print(e)
+
+        print(Filter Applied.)
