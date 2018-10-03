@@ -8,13 +8,14 @@ class FilterDesign_window(tk.Frame):
         self.master = master
         self.controller = controller
         self.init_window()
+        self.next_row = 0
 
 
     def init_window(self):
         self.master.geometry("800x600")
         self.master.title('Prediction-DSP-Classification-Toolbox')
 
-        self.label_import_export_title = tk.Label(self.master, text="Import/Export Data", font=('Helvetica', 14, 'bold'))
+        self.label_import_export_title = tk.Label(self.master, text="Import/Export", font=('Helvetica', 14, 'bold'))
         self.label_import_export_title.grid(row = 0, column = 0, columnspan = 2, pady = 5, sticky = "ew")
         self.label_import_data = tk.Label(self.master, text="Import Data: ")
         self.label_import_data.grid(row = 1, column = 0, padx = 5, sticky = "ew")
@@ -28,7 +29,7 @@ class FilterDesign_window(tk.Frame):
         self.option_export_data_var = tk.StringVar(self.master)
         self.option_export_data_var.set("Filtered Data")
         self.option_export_data_menu = tk.OptionMenu(self.master, self.option_export_data_var, "Filtered Data", "Filter Coefficients", "Filter Response")
-        self.option_export_data_menu.grid(row = 3, column = 1, sticky = "ew")
+        self.option_export_data_menu.grid(row = 3, column = 1, pady = 5, sticky = "ew")
         self.button_export_data = tk.Button(self.master, text = "Export...", command = self.button_export_data_click)
         self.button_export_data.grid(row = 4, column = 0, columnspan =2, padx = 5,  sticky = "ew")
         self.label_export_error = tk.Label(self.master)
@@ -49,8 +50,16 @@ class FilterDesign_window(tk.Frame):
 
         self.update_filter_view()
 
+        self.separator_1 = ttk.Separator(self.master, orient="horizontal")
+        self.separator_1.grid(row = self.next_row, column = 0, columnspan = 2, sticky = "ew")
+
+        self.label_import_export_title = tk.Label(self.master, text="Plot", font=('Helvetica', 14, 'bold'))
+        self.label_import_export_title.grid(row = self.next_row+1, column = 0, columnspan = 2, pady = 5, sticky = "ew")
+
+
     def update_filter_view(self, *args):
         if self.option_filter_select_var.get() == "Butterworth":
+            self.next_row = 15
             self.label_filter_order = tk.Label(self.master, text="Order:")
             self.label_filter_order.grid(row = 9, column = 0, pady = 5)
 
@@ -136,4 +145,4 @@ class FilterDesign_window(tk.Frame):
         except ValueError as e:
             print(e)
 
-        print(Filter Applied.)
+        print("Filter Applied.")
