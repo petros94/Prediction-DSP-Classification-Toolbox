@@ -1,6 +1,10 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.filedialog as tkf
+import matplotlib
+matplotlib.use("TkAgg")
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
+import matplotlib.pyplot
 
 class FilterDesign_window(tk.Frame):
     def __init__(self, master, controller = None):
@@ -9,12 +13,14 @@ class FilterDesign_window(tk.Frame):
         self.controller = controller
         self.init_window()
         self.next_row = 0
+        self.subplot_index = True
 
 
     def init_window(self):
-        self.master.geometry("800x600")
+        self.master.geometry("840x630")
         self.master.title('Prediction-DSP-Classification-Toolbox')
 
+        """Menu"""
         self.label_import_export_title = tk.Label(self.master, text="Import/Export", font=('Helvetica', 14, 'bold'))
         self.label_import_export_title.grid(row = 0, column = 0, columnspan = 2, pady = 5, sticky = "ew")
         self.label_import_data = tk.Label(self.master, text="Import Data: ")
@@ -53,8 +59,29 @@ class FilterDesign_window(tk.Frame):
         self.separator_1 = ttk.Separator(self.master, orient="horizontal")
         self.separator_1.grid(row = self.next_row, column = 0, columnspan = 2, sticky = "ew")
 
-        self.label_import_export_title = tk.Label(self.master, text="Plot", font=('Helvetica', 14, 'bold'))
-        self.label_import_export_title.grid(row = self.next_row+1, column = 0, columnspan = 2, pady = 5, sticky = "ew")
+        self.label_plot_title = tk.Label(self.master, text="Plot", font=('Helvetica', 14, 'bold'))
+        self.label_plot_title.grid(row = self.next_row+1, column = 0, columnspan = 2, pady = 5, sticky = "ew")
+        self.label_graph = tk.Label(self.master, text = "Graph:")
+        self.label_graph.grid(row = self.next_row+2, column = 0, pady = 5)
+        self.option_graph_var = tk.StringVar(self.master)
+        self.option_graph_var.set("Original Data")
+        self.option_graph_select = tk.OptionMenu(self.master, self.option_graph_var, "Original Data", "FFT", "Filtered Data")
+        self.option_graph_select.grid(row = self.next_row + 2, column = 1, pady = 5, sticky = "e")
+        self.button_graph_show = tk.Button(self.master, text = "Show Graph", command = self.button_graph_show_click)
+        self.button_graph_show.grid(row = self.next_row + 3, column = 0, columnspan = 2, sticky = "ew")
+
+        """Plot"""
+        self.figure = matplotlib.pyplot.Figure(figsize=(6,6), dpi=100)
+        self.figure_subplot_a = self.figure.add_subplot(211)
+        self.figure_subplot_b = self.figure.add_subplot(212)
+        self.figure.subplots_adjust(hspace = 0.3)
+        self.canvas = FigureCanvasTkAgg(self.figure, self.master)
+        self.canvas.get_tk_widget().grid(row = 0, column = 4, rowspan = self.next_row+4, columnspan = 5, sticky = "nwes")
+
+        self.toolbar_frame = tk.Frame(self.master)
+        self.toolbar_frame.grid(row = self.next_row+3, column = 4, sticky = "e")
+        self.toolbar = NavigationToolbar2Tk(self.canvas, self.toolbar_frame)
+        self.toolbar.update()
 
 
     def update_filter_view(self, *args):
@@ -109,6 +136,17 @@ class FilterDesign_window(tk.Frame):
         self.label_import_error['text'] = "Data Imported."
         self.label_import_error['fg'] = "green"
 
+        try:
+            graph_data = self.controller.get_plot_data("Original Data")
+        except ValueError as e:
+            print(e)
+            return None
+
+        self.figure_subplot_a.plot(graph_data, c = "C0")
+        self.subplot_index = not self.subplot_index
+        self.canvas.draw()
+
+
     def button_export_data_click(self):
         file_name = tkf.asksaveasfilename(filetypes = (("Plain Text", "*.txt"), ("CSV File", "*.csv")))
         if not file_name:
@@ -146,3 +184,20 @@ class FilterDesign_window(tk.Frame):
             print(e)
 
         print("Filter Applied.")
+
+    def button_graph_show_click(self):
+        try:
+            graph_data = self.controller.get_plot_data(self.option_graph_var.get())
+        except ValueError as e:
+            print(e)
+            return None
+
+        if self.subplot_index:
+            self.figure_subplot_a.cla()
+            self.figure_subplot_a.plot(graph_data, c = "C0")
+            self.subplot_index = not self.subplot_index
+        else:
+            self.figure_subplot_b.cla()
+            self.figure_subplot_b.plot(graph_data, c = "C1")
+            self.subplot_index = not self.subplot_index
+        self.canvas.draw()
