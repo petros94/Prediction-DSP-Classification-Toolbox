@@ -182,6 +182,7 @@ class FilterDesign_window(tk.Frame):
             self.controller.apply_filter(filter_parameters)
         except ValueError as e:
             print(e)
+            return None
 
         print("Filter Applied.")
 
