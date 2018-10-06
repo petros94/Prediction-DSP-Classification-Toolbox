@@ -6,22 +6,40 @@ sys.path.insert(0,parentdir)
 import FilterDesign as fdes
 import pandas as pd
 import numpy as np
+import scipy.signal as sc
 import matplotlib.pyplot as plt
 
 class FilterDesign_controller:
     def __init__(self, appdata_object):
         self.app_data = appdata_object
 
-    def import_data(self, data_path):
+    def import_data(self, data_path, header, byrow, index):
+        if index == "-- Select Column --" or index == "-- Select Row --":
+            raise ValueError("Select Row/Column")
+        else:
+            index = int(index)
+
         try:
-            imported_data = np.loadtxt(data_path)
+            if header:
+                imported_data = pd.read_csv(data_path)
+            else:
+                imported_data = pd.read_csv(data_path, header = None)
         except ValueError as e:
-            raise ValueError("Data must be one-dimensional numeric, \n separated be newline.")
+            raise ValueError("Data must be numeric, \n separated be newline.")
 
-        if len(imported_data.shape) != 1:
-            raise ValueError("Data must be one-dimensional numeric, \n separated by newline.")
+        if imported_data.isna().values.any() == True:
+            raise ValueError("Data contains Nan values")
 
-        self.app_data.data = np.loadtxt(data_path)
+        if imported_data.columns.size != 1:
+            if byrow:
+                self.app_data.data = imported_data.iloc[index,:].values
+            else:
+                self.app_data.data = imported_data.iloc[:,index].values
+        else:
+            if byrow:
+                self.app_data.data = imported_data.iloc[0,:].values
+            else:
+                self.app_data.data = imported_data.iloc[:,0].values
 
     def export_data(self, data_path, data_type):
         if not self.app_data.filter_applied:
@@ -82,6 +100,26 @@ class FilterDesign_controller:
                 raise ValueError("Must apply a filter first.")
         elif plot_type == "FFT":
             if type(self.app_data.data) == np.ndarray:
+                print(self.app_data.data)
+                print(np.abs(np.fft.fft(self.app_data.data)))
                 return np.abs(np.fft.fft(self.app_data.data))
             else:
                 raise ValueError("Error: Must import data first.")
+        elif plot_type == "Filter Response":
+            if self.app_data.filter_applied:
+                if self.app_data.filter_type == "Butterworth":
+                    sos = np.zeros([len(self.app_data.filter.IIR_filters), 6])
+                    idx = 0
+                    for filter in self.app_data.filter.IIR_filters:
+                        if filter.P_order == 2:
+                            sos[idx] = [filter.P_coeff[0], filter.P_coeff[1], filter.P_coeff[2],
+                                        1, filter.Q_coeff[0], filter.Q_coeff[1]]
+                            idx += 1
+                        elif filter.P_order == 1:
+                            sos[idx] = [0, filter.P_coeff[0], filter.P_coeff[1],
+                                        1, filter.Q_coeff[0], 0]
+                            idx += 1
+                    w, h = sc.sosfreqz(sos, worN = None, whole = False)
+                    return np.array([w,np.abs(h)])
+            else:
+                raise ValueError("Must apply a filter first.")
