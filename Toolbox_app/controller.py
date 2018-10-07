@@ -14,11 +14,6 @@ class FilterDesign_controller:
         self.app_data = appdata_object
 
     def import_data(self, data_path, header, byrow, index):
-        if index == "-- Select Column --" or index == "-- Select Row --":
-            raise ValueError("Select Row/Column")
-        else:
-            index = int(index)
-
         try:
             if header:
                 imported_data = pd.read_csv(data_path)
@@ -30,14 +25,25 @@ class FilterDesign_controller:
         if imported_data.isna().values.any() == True:
             raise ValueError("Data contains Nan values")
 
-        if imported_data.columns.size != 1:
-            if byrow:
+        if byrow:
+            if imported_data.index.size != 1:
+                if index == "-- Select Column --" or index == "-- Select Row --":
+                    raise ValueError("Select which Row to import")
+                else:
+                    index = int(index)
+
                 self.app_data.data = imported_data.iloc[index,:].values
             else:
-                self.app_data.data = imported_data.iloc[:,index].values
-        else:
-            if byrow:
                 self.app_data.data = imported_data.iloc[0,:].values
+
+        else:
+            if imported_data.columns.size != 1:
+                if index == "-- Select Column --" or index == "-- Select Row --":
+                    raise ValueError("Select which Column to import")
+                else:
+                    index = int(index)
+
+                self.app_data.data = imported_data.iloc[:,index].values
             else:
                 self.app_data.data = imported_data.iloc[:,0].values
 
@@ -100,8 +106,6 @@ class FilterDesign_controller:
                 raise ValueError("Must apply a filter first.")
         elif plot_type == "FFT":
             if type(self.app_data.data) == np.ndarray:
-                print(self.app_data.data)
-                print(np.abs(np.fft.fft(self.app_data.data)))
                 return np.abs(np.fft.fft(self.app_data.data))
             else:
                 raise ValueError("Error: Must import data first.")
