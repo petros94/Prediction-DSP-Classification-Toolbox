@@ -39,4 +39,4 @@ _pip3 install package_name_
 
 After installing the necessary packages run the following:
 
-python3 run.py
+_python3 run.py_
