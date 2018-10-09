@@ -18,7 +18,7 @@ class FilterDesign_window(tk.Frame):
 
     def init_window(self):
         self.master.geometry("840x630")
-        self.master.title('Prediction-DSP-Classification-Toolbox')
+        self.master.title('Digital Filter Design')
         self.view_butterworth = dict()
         self.view_IIR = dict()
         self.IIR_filter_P_coeffs = dict()

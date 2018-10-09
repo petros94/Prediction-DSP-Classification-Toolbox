@@ -4,7 +4,7 @@ try:
     import pandas
     import matplotlib
 except ImportError as e:
-    print("Requirements not met, please install Numpy, Pandas and Matplotlib")
+    print("Missing python packages: please install Numpy, SciPy, Pandas and Matplotlib")
     sys.exit()
 
 print("Requirements met.")
