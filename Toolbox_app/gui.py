@@ -16,10 +16,13 @@ class FilterDesign_window(tk.Frame):
         self.option_graph_2_var_prev = "FFT"
         self.option_graph_1_var_prev = "Original Data"
 
-
     def init_window(self):
         self.master.geometry("840x630")
         self.master.title('Prediction-DSP-Classification-Toolbox')
+        self.view_butterworth = dict()
+        self.view_IIR = dict()
+        self.IIR_filter_P_coeffs = dict()
+        self.IIR_filter_Q_coeffs = dict()
 
         """Menu"""
         self.label_import_export_title = tk.Label(self.master, text="Import/Export", font=('Helvetica', 14, 'bold'))
@@ -60,7 +63,7 @@ class FilterDesign_window(tk.Frame):
         self.option_filter_select_var = tk.StringVar(self.master)
         self.option_filter_select_var.set("Butterworth")
         self.option_filter_select_var.trace(mode = "w", callback = self.update_filter_view)
-        self.option_filter_select = tk.OptionMenu(self.master, self.option_filter_select_var, "Butterworth")
+        self.option_filter_select = tk.OptionMenu(self.master, self.option_filter_select_var, "Butterworth", "IIR Filter")
         self.option_filter_select.grid(row = 9, column = 1, sticky = "e")
 
         self.update_filter_view()
@@ -100,41 +103,102 @@ class FilterDesign_window(tk.Frame):
 
     """View update functions"""
     def update_filter_view(self, *args):
+
+        self.clear_filter_view()
+
         if self.option_filter_select_var.get() == "Butterworth":
             self.next_row = 16
-            self.label_filter_order = tk.Label(self.master, text="Order:")
-            self.label_filter_order.grid(row = 10, column = 0, pady = 5)
+            self.view_butterworth["label_filter_order"] = tk.Label(self.master, text="Order:")
+            self.view_butterworth["label_filter_order"].grid(row = 10, column = 0, pady = 5)
+            self.view_butterworth["option_filter_order_var"] = tk.IntVar(self.master)
+            self.view_butterworth["option_filter_order_var"].set(1)
+            self.view_butterworth["option_filter_order"] = tk.OptionMenu(self.master, self.view_butterworth["option_filter_order_var"], 1, 2, 3, 4, 5, 6, 7, 8)
+            self.view_butterworth["option_filter_order"].grid(row = 10, column = 1, pady = 5, sticky = "e")
 
-            self.option_filter_order_var = tk.IntVar(self.master)
-            self.option_filter_order_var.set(1)
-            self.option_filter_order = tk.OptionMenu(self.master, self.option_filter_order_var, 1, 2, 3, 4, 5, 6, 7, 8)
-            self.option_filter_order.grid(row = 10, column = 1, pady = 5, sticky = "e")
+            self.view_butterworth["label_filter_cutoff_freq"] = tk.Label(self.master, text="Analog\n Cutoff\n Frequency (Hz):")
+            self.view_butterworth["label_filter_cutoff_freq"].grid(row = 11, column = 0, pady = 5)
+            self.view_butterworth["entry_filter_cuttof_freq_var"] = tk.IntVar(self.master)
+            self.view_butterworth["entry_filter_cuttof_freq"] = tk.Entry(self.master, textvariable = self.view_butterworth["entry_filter_cuttof_freq_var"], justify = "right", width = 12)
+            self.view_butterworth["entry_filter_cuttof_freq"].grid(row = 11, column = 1, pady = 5, sticky = "e")
 
-            self.label_filter_cutoff_freq = tk.Label(self.master, text="Analog\n Cutoff\n Frequency (Hz):")
-            self.label_filter_cutoff_freq.grid(row = 11, column = 0, pady = 5)
-            self.entry_filter_cuttof_freq_var = tk.IntVar(self.master)
-            self.entry_filter_cuttof_freq = tk.Entry(self.master, textvariable = self.entry_filter_cuttof_freq_var, justify = "right", width = 12)
-            self.entry_filter_cuttof_freq.grid(row = 11, column = 1, pady = 5, sticky = "e")
+            self.view_butterworth["label_filter_sampling_rate"] = tk.Label(self.master, text="Sampling Rate\n(Hz):")
+            self.view_butterworth["label_filter_sampling_rate"].grid(row = 12, column = 0, pady = 5)
+            self.view_butterworth["entry_filter_sampling_rate_var"] = tk.IntVar(self.master)
+            self.view_butterworth["entry_filter_sampling_rate"] = tk.Entry(self.master, textvariable = self.view_butterworth["entry_filter_sampling_rate_var"], justify = "right", width = 12)
+            self.view_butterworth["entry_filter_sampling_rate"].grid(row = 12, column = 1, pady = 5, sticky = "e")
 
-            self.label_filter_sampling_rate = tk.Label(self.master, text="Sampling Rate\n(Hz):")
-            self.label_filter_sampling_rate.grid(row = 12, column = 0, pady = 5)
-            self.entry_filter_sampling_rate_var = tk.IntVar(self.master)
-            self.entry_filter_sampling_rate = tk.Entry(self.master, textvariable = self.entry_filter_sampling_rate_var, justify = "right", width = 12)
-            self.entry_filter_sampling_rate.grid(row = 12, column = 1, pady = 5, sticky = "e")
+            self.view_butterworth["label_filter_dc_gain"] = tk.Label(self.master, text="DC Gain (V/V):")
+            self.view_butterworth["label_filter_dc_gain"].grid(row = 13, column = 0, pady = 5)
+            self.view_butterworth["entry_filter_dc_gain_var"] = tk.IntVar(self.master)
+            self.view_butterworth["entry_filter_dc_gain_var"].set(1)
+            self.view_butterworth["entry_filter_dc_gain"] = tk.Entry(self.master, textvariable = self.view_butterworth["entry_filter_dc_gain_var"], justify = "right", width = 12)
+            self.view_butterworth["entry_filter_dc_gain"].grid(row = 13, column = 1, pady = 5, sticky = "e")
 
-            self.label_filter_dc_gain = tk.Label(self.master, text="DC Gain (V/V):")
-            self.label_filter_dc_gain.grid(row = 13, column = 0, pady = 5)
-            self.entry_filter_dc_gain_var = tk.IntVar(self.master)
-            self.entry_filter_dc_gain_var.set(1)
-            self.entry_filter_dc_gain = tk.Entry(self.master, textvariable = self.entry_filter_dc_gain_var, justify = "right", width = 12)
-            self.entry_filter_dc_gain.grid(row = 13, column = 1, pady = 5, sticky = "e")
+            self.view_butterworth["button_filter_apply"] = tk.Button(self.master, text = "Apply", command = self.button_butterworth_filter_apply_click)
+            self.view_butterworth["button_filter_apply"].grid(row = 14, column = 0, columnspan = 2, pady = 5, sticky = "ew")
 
-            self.button_filter_apply = tk.Button(self.master, text = "Apply", command = self.button_filter_apply_click)
-            self.button_filter_apply.grid(row = 14, column = 0, columnspan = 2, pady = 5, sticky = "ew")
+            self.view_butterworth["label_apply_error"] = tk.Label(self.master)
+            self.view_butterworth["label_apply_error"].grid(row = 15, column = 0, columnspan = 2)
+        elif self.option_filter_select_var.get() == "IIR Filter":
+            self.next_row = 16
+            self.view_IIR["label_filter_P_order"] = tk.Label(self.master, text="P order:")
+            self.view_IIR["label_filter_P_order"].grid(row = 10, column = 0, pady = 5)
+            self.view_IIR["option_filter_P_order_var"] = tk.IntVar(self.master)
+            self.view_IIR["option_filter_P_order_var"].set("0")
+            self.view_IIR["option_filter_P_order_var"].trace("w", self.update_view_IIR_filter_P_coeff_list)
+            self.view_IIR["option_filter_P_order"] = tk.OptionMenu(self.master, self.view_IIR["option_filter_P_order_var"], 0, 1, 2, 3, 4, 5, 6, 7, 8)
+            self.view_IIR["option_filter_P_order"].grid(row = 10, column = 1, pady = 5, sticky = "e")
+            self.view_IIR["option_filter_P_coeffs_select_var"] = tk.StringVar(self.master)
+            self.view_IIR["option_filter_P_coeffs_select_var"].set("0")
+            self.view_IIR["option_filter_P_coeffs_select_var"].trace("w", self.update_view_IIR_filter_P_coeff_value)
+            self.view_IIR["option_filter_P_coeffs_select"] = tk.OptionMenu(self.master, self.view_IIR["option_filter_P_coeffs_select_var"], '')
+            self.view_IIR["option_filter_P_coeffs_select"].grid(row = 11, column = 0)
+            self.view_IIR["entry_filter_P_coeffs_var"] = tk.StringVar(self.master)
+            self.view_IIR["entry_filter_P_coeffs_var"].set("0.000")
+            self.view_IIR["entry_filter_P_coeffs_var"].trace("w", self.update_filter_P_coeffs)
+            self.view_IIR["entry_filter_P_coeffs"] = tk.Entry(self.master, textvariable = self.view_IIR["entry_filter_P_coeffs_var"], justify = "right", width = 6)
+            self.view_IIR["entry_filter_P_coeffs"].grid(row = 11, column = 1, sticky = "e")
 
-            self.label_apply_error = tk.Label(self.master)
-            self.label_apply_error.grid(row = 15, column = 0, columnspan = 2)
+            self.view_IIR["label_filter_Q_order"] = tk.Label(self.master, text="Q order:")
+            self.view_IIR["label_filter_Q_order"].grid(row = 12, column = 0, pady = 5)
+            self.view_IIR["option_filter_Q_order_var"] = tk.IntVar(self.master)
+            self.view_IIR["option_filter_Q_order_var"].set("1")
+            self.view_IIR["option_filter_Q_order_var"].trace("w", self.update_view_IIR_filter_Q_coeff_list)
+            self.view_IIR["option_filter_Q_order"] = tk.OptionMenu(self.master, self.view_IIR["option_filter_Q_order_var"], 1, 2, 3, 4, 5, 6, 7, 8)
+            self.view_IIR["option_filter_Q_order"].grid(row = 12, column = 1, pady = 5, sticky = "e")
+            self.view_IIR["option_filter_Q_coeffs_select_var"] = tk.StringVar(self.master)
+            self.view_IIR["option_filter_Q_coeffs_select_var"].set("0")
+            self.view_IIR["option_filter_Q_coeffs_select_var"].trace("w", self.update_view_IIR_filter_Q_coeff_value)
+            self.view_IIR["option_filter_Q_coeffs_select"] = tk.OptionMenu(self.master, self.view_IIR["option_filter_Q_coeffs_select_var"], '')
+            self.view_IIR["option_filter_Q_coeffs_select"].grid(row = 13, column = 0)
+            self.view_IIR["entry_filter_Q_coeffs_var"] = tk.StringVar(self.master)
+            self.view_IIR["entry_filter_Q_coeffs_var"].set("0.000")
+            self.view_IIR["entry_filter_Q_coeffs_var"].trace("w", self.update_filter_Q_coeffs)
+            self.view_IIR["entry_filter_Q_coeffs"] = tk.Entry(self.master, textvariable = self.view_IIR["entry_filter_Q_coeffs_var"], justify = "right", width = 6)
+            self.view_IIR["entry_filter_Q_coeffs"].grid(row = 13, column = 1, sticky = "e")
 
+            self.view_IIR["button_filter_apply"] = tk.Button(self.master, text = "Apply", command = self.button_IIR_filter_apply_click)
+            self.view_IIR["button_filter_apply"].grid(row = 14, column = 0, columnspan = 2, pady = 5, sticky = "ew")
+
+            self.view_IIR["label_apply_error"] = tk.Label(self.master)
+            self.view_IIR["label_apply_error"].grid(row = 15, column = 0, columnspan = 2)
+
+            self.update_view_IIR_filter_P_coeff_list()
+            self.update_view_IIR_filter_Q_coeff_list()
+
+
+
+    def clear_filter_view(self, *args):
+        for key in self.view_butterworth:
+            try:
+                self.view_butterworth[key].destroy()
+            except Exception:
+                pass
+        for key in self.view_IIR:
+            try:
+                self.view_IIR[key].destroy()
+            except Exception:
+                pass
 
     def update_plot_view(self, *args):
         try:
@@ -142,7 +206,6 @@ class FilterDesign_window(tk.Frame):
             self.option_graph_1_var_prev = self.option_graph_1_var.get()
             self.figure_subplot_a.cla()
             if graph_1_data.shape[0] == 2:
-                print("yolo")
                 graph_1_data_x = graph_1_data[0]
                 graph_1_data_y = graph_1_data[1]
                 self.figure_subplot_a.plot(graph_1_data_x, graph_1_data_y, c = "C0")
@@ -167,6 +230,72 @@ class FilterDesign_window(tk.Frame):
             self.option_graph_2_var.set(self.option_graph_2_var_prev)
 
         self.canvas.draw()
+
+    def update_view_IIR_filter_P_coeff_list(self, *args):
+        menu = self.view_IIR["option_filter_P_coeffs_select"]['menu']
+        menu.delete(0, 'end')
+
+        for i in range(self.view_IIR["option_filter_P_order_var"].get()+1):
+            menu.add_command(label = "P coeff "+ str(i), command=lambda p_coeff = i: self.view_IIR["option_filter_P_coeffs_select_var"].set("P coeff " + str(p_coeff)))
+
+        for i in range(9):
+            self.IIR_filter_P_coeffs[i] = 0.000
+
+        self.view_IIR["option_filter_P_coeffs_select_var"].set("P coeff 0")
+
+    def update_view_IIR_filter_P_coeff_value(self, *args):
+        coeff_order = int(self.view_IIR["option_filter_P_coeffs_select_var"].get()[-1])
+        coeff_value = self.IIR_filter_P_coeffs[coeff_order]
+        self.view_IIR["entry_filter_P_coeffs_var"].set(str(coeff_value))
+
+
+
+    def update_filter_P_coeffs(self, *args):
+        coeff_order = int(self.view_IIR["option_filter_P_coeffs_select_var"].get()[-1])
+        try:
+            coeff_value = float(self.view_IIR["entry_filter_P_coeffs_var"].get())
+        except ValueError as e:
+            self.view_IIR["label_apply_error"]['text'] = "please input float number"
+            self.view_IIR["label_apply_error"]['fg'] = "red"
+            return None
+
+        self.view_IIR["label_apply_error"]['text'] = ""
+        self.view_IIR["label_apply_error"]['fg'] = "red"
+        self.IIR_filter_P_coeffs[coeff_order] = coeff_value
+
+    def update_view_IIR_filter_Q_coeff_list(self, *args):
+        menu = self.view_IIR["option_filter_Q_coeffs_select"]['menu']
+        menu.delete(0, 'end')
+
+        for i in range(self.view_IIR["option_filter_Q_order_var"].get()):
+            menu.add_command(label = "Q coeff "+ str(i), command=lambda q_coeff = i: self.view_IIR["option_filter_Q_coeffs_select_var"].set("Q coeff " + str(q_coeff)))
+
+        for i in range(9):
+            self.IIR_filter_Q_coeffs[i] = 0.000
+
+
+        self.view_IIR["option_filter_Q_coeffs_select_var"].set("Q coeff 0")
+
+    def update_view_IIR_filter_Q_coeff_value(self, *args):
+        coeff_order = int(self.view_IIR["option_filter_Q_coeffs_select_var"].get()[-1])
+        coeff_value = self.IIR_filter_Q_coeffs[coeff_order]
+        self.view_IIR["entry_filter_Q_coeffs_var"].set(str(coeff_value))
+
+
+
+    def update_filter_Q_coeffs(self, *args):
+        coeff_order = int(self.view_IIR["option_filter_Q_coeffs_select_var"].get()[-1])
+        try:
+            coeff_value = float(self.view_IIR["entry_filter_Q_coeffs_var"].get())
+        except ValueError as e:
+            self.view_IIR["label_apply_error"]['text'] = "please input float number"
+            self.view_IIR["label_apply_error"]['fg'] = "red"
+            return None
+
+        self.view_IIR["label_apply_error"]['text'] = ""
+        self.view_IIR["label_apply_error"]['fg'] = "red"
+        self.IIR_filter_Q_coeffs[coeff_order] = coeff_value
+
 
     """Button click functions"""
     def button_import_data_click(self):
@@ -207,21 +336,21 @@ class FilterDesign_window(tk.Frame):
         self.label_import_export_error['text'] = "Data Exported."
         self.label_import_export_error['fg'] = "green"
 
-    def button_filter_apply_click(self):
+    def button_butterworth_filter_apply_click(self):
         try:
             filter_parameters = {
                 "type": self.option_filter_select_var.get(),
-                "order": self.option_filter_order_var.get(),
-                "cutoff_freq": self.entry_filter_cuttof_freq_var.get(),
-                "sampling_rate": self.entry_filter_sampling_rate_var.get(),
-                "dc_gain": self.entry_filter_dc_gain_var.get()
+                "order": self.view_butterworth["option_filter_order_var"].get(),
+                "cutoff_freq": self.view_butterworth["entry_filter_cuttof_freq_var"].get(),
+                "sampling_rate": self.view_butterworth["entry_filter_sampling_rate_var"].get(),
+                "dc_gain": self.view_butterworth["entry_filter_dc_gain_var"].get()
             }
         except tk.TclError as e:
-            self.label_apply_error['text'] = "Invalid Parameters."
-            self.label_apply_error['fg'] = "red"
+            self.view_butterworth["label_apply_error"]['text'] = "Invalid Parameters."
+            self.view_butterworth["label_apply_error"]['fg'] = "red"
             return None
 
-        self.label_apply_error['text'] = ""
+        self.view_butterworth["label_apply_error"]['text'] = ""
 
         try:
             self.controller.apply_filter(filter_parameters)
@@ -230,7 +359,37 @@ class FilterDesign_window(tk.Frame):
             return None
 
         self.update_plot_view()
-        print("Filter Applied.")
+
+        self.view_butterworth["label_apply_error"]['text'] = "Filter Applied"
+        self.view_butterworth["label_apply_error"]['fg'] = "green"
+
+    def button_IIR_filter_apply_click(self):
+        try:
+            filter_parameters = {
+            "type": self.option_filter_select_var.get(),
+            "P_order": self.view_IIR["option_filter_P_order_var"].get(),
+            "P_coeff": self.IIR_filter_P_coeffs,
+            "Q_order": self.view_IIR["option_filter_Q_order_var"].get(),
+            "Q_coeff": self.IIR_filter_Q_coeffs
+            }
+        except tk.TclError as e:
+            self.view_IIR["label_apply_error"]['text'] = "Invalid Parameters."
+            self.view_IIR["label_apply_error"]['fg'] = "red"
+            return None
+
+        self.view_IIR["label_apply_error"]['text'] = ""
+
+        try:
+            self.controller.apply_filter(filter_parameters)
+        except ValueError as e:
+            print(e)
+            return None
+
+        self.update_plot_view()
+
+        self.view_IIR["label_apply_error"]['text'] = "Filter Applied"
+        self.view_IIR["label_apply_error"]['fg'] = "green"
+
 
     def check_import_data_byrow_click(self):
         if self.check_import_data_byrow_var.get():

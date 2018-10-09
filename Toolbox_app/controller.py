@@ -92,6 +92,15 @@ class FilterDesign_controller:
             self.app_data.filtered_data = self.app_data.filter.apply(self.app_data.data)
             self.app_data.filter_applied = True
 
+        elif filter_parameters["type"] == "IIR Filter":
+            self.app_data.filter = fdes.IIR_filter(P_order = filter_parameters["P_order"],
+                                                   P_coefficients = list(filter_parameters["P_coeff"].values()),
+                                                   Q_order = filter_parameters["Q_order"],
+                                                   Q_coefficients = list(filter_parameters["Q_coeff"].values()))
+            self.app_data.filter_type = "IIR Filter"
+            self.app_data.filtered_data = self.app_data.filter.apply(self.app_data.data)
+            self.app_data.filter_applied = True
+
     def get_plot_data(self, plot_type):
         if plot_type == "Original Data":
             if type(self.app_data.data) == np.ndarray:
@@ -124,6 +133,11 @@ class FilterDesign_controller:
                                         1, filter.Q_coeff[0], 0]
                             idx += 1
                     w, h = sc.sosfreqz(sos, worN = None, whole = False)
+                    return np.array([w,np.abs(h)])
+                if self.app_data.filter_type == "IIR Filter":
+                    b = self.app_data.filter.P_coeff
+                    a = np.concatenate([[1], self.app_data.filter.Q_coeff])
+                    w, h = sc.freqz(b = b, a = a)
                     return np.array([w,np.abs(h)])
             else:
                 raise ValueError("Must apply a filter first.")
