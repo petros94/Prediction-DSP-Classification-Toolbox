@@ -26,16 +26,16 @@ Export multiple things like filter parameters, plots, data after processing, etc
 
 First use terminal to download the repository with:
 
-git clone https://github.com/petros94/Prediction-DSP-Classification-Toolbox
+_git clone https://github.com/petros94/Prediction-DSP-Classification-Toolbox_
 
 Then from the top level directory do:
 
-cd Toolbox_app/; python3 check_dependancies.py
+_cd Toolbox_app/; python3 check_dependancies.py_
 
 This script is used to check if you have all the required python packages installed. This toolbox uses:Python3, Numpy, Scipy,
 Pandas and Matplotlib. Install any required package using:
 
-pip3 install package_name
+_pip3 install package_name_
 
 After installing the necessary packages run the following:
 
