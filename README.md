@@ -21,3 +21,22 @@ Export multiple things like filter parameters, plots, data after processing, etc
 
 * __Plot data__: Plot your data before and after filtering, as well as, the DFT and frequency response of the filter.
 
+
+### How to run the application ###
+
+First use terminal to download the repository with:
+
+git clone https://github.com/petros94/Prediction-DSP-Classification-Toolbox
+
+Then from the top level directory do:
+
+cd Toolbox_app/; python3 check_dependancies.py
+
+This script is used to check if you have all the required python packages installed. This toolbox uses:Python3, Numpy, Scipy,
+Pandas and Matplotlib. Install any required package using:
+
+pip3 install package_name
+
+After installing the necessary packages run the following:
+
+python3 run.py
