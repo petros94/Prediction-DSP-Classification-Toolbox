@@ -1,7 +1,7 @@
 # Prediction-DSP-Classification-Toolbox
 A collection of the most popular prediction techniques, implemented in python
 
-This project is a collection of DSP and machine learning packages, presented 
+This project is a collection of DSP, timeseries analysis and machine learning packages, presented 
 in a single toolbox with an easy to use GUI.
 
 So far we've implemented some filter design techniques and the corresponding interface. 
