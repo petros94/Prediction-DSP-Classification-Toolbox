@@ -22,7 +22,7 @@ Export multiple things like filter parameters, plots, data after processing, etc
 * __Plot data__: Plot your data before and after filtering, as well as, the DFT and frequency response of the filter.
 
 ### Screenshots ###
-![Alt text](Screenshots/window1.png?raw=true "Application Window")
+![Alt text](Screenshots/Window1.png?raw=true "Application Window")
 
 
 ### How to run the application ###
