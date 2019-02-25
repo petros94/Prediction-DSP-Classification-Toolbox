@@ -101,6 +101,16 @@ class FilterDesign_controller:
             self.app_data.filtered_data = self.app_data.filter.apply(self.app_data.data)
             self.app_data.filter_applied = True
 
+        elif filter_parameters["type"] == "FIR Filter":
+            self.app_data.filter = fdes.FIR_filter(sampling_period = 1/filter_parameters["sampling_rate"],
+                                                   type = filter_parameters["FIR_type"],
+                                                   filter_order = filter_parameters["order"],
+                                                   analog_lower_cutoff_freq = filter_parameters["lower_cutoff_freq"],
+                                                   analog_upper_cutoff_freq = filter_parameters["upper_cutoff_freq"])
+            self.app_data.filter_type = "FIR Filter"
+            self.app_data.filtered_data = self.app_data.filter.apply(self.app_data.data)
+            self.app_data.filter_applied = True
+
     def get_plot_data(self, plot_type):
         if plot_type == "Original Data":
             if type(self.app_data.data) == np.ndarray:
@@ -115,7 +125,14 @@ class FilterDesign_controller:
                 raise ValueError("Must apply a filter first.")
         elif plot_type == "FFT":
             if type(self.app_data.data) == np.ndarray:
-                return np.abs(np.fft.fft(self.app_data.data))
+                if self.app_data.filter_type == "FIR Filter" or self.app_data.filter_type == "Butterworth":
+                    fft_values = np.abs(np.fft.fft(self.app_data.data))
+                    fft_freq = np.zeros(len(fft_values))
+                    for i in range(len(fft_freq)):
+                        fft_freq[i] = i/(len(fft_freq)*self.app_data.filter.Ts)
+                    return np.array([fft_freq, fft_values])
+                else:
+                    return np.abs(np.fft.fft(self.app_data.data))
             else:
                 raise ValueError("Error: Must import data first.")
         elif plot_type == "Filter Response":
@@ -133,11 +150,16 @@ class FilterDesign_controller:
                                         1, filter.Q_coeff[0], 0]
                             idx += 1
                     w, h = sc.sosfreqz(sos, worN = None, whole = False)
+                    w = w/(2 * np.pi * self.app_data.filter.Ts)
                     return np.array([w,np.abs(h)])
-                if self.app_data.filter_type == "IIR Filter":
+                elif self.app_data.filter_type == "IIR Filter":
                     b = self.app_data.filter.P_coeff
                     a = np.concatenate([[1], self.app_data.filter.Q_coeff])
                     w, h = sc.freqz(b = b, a = a)
+                    return np.array([w,np.abs(h)])
+                elif self.app_data.filter_type == "FIR Filter":
+                    w, h = sc.freqz(b = self.app_data.filter.filter_coeffs)
+                    w = w/(2 * np.pi * self.app_data.filter.Ts)
                     return np.array([w,np.abs(h)])
             else:
                 raise ValueError("Must apply a filter first.")

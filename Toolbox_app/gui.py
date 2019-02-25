@@ -17,10 +17,11 @@ class FilterDesign_window(tk.Frame):
         self.option_graph_1_var_prev = "Original Data"
 
     def init_window(self):
-        self.master.geometry("840x630")
+        self.master.geometry("840x680")
         self.master.title('Digital Filter Design')
         self.view_butterworth = dict()
         self.view_IIR = dict()
+        self.view_FIR = dict()
         self.IIR_filter_P_coeffs = dict()
         self.IIR_filter_Q_coeffs = dict()
 
@@ -63,7 +64,7 @@ class FilterDesign_window(tk.Frame):
         self.option_filter_select_var = tk.StringVar(self.master)
         self.option_filter_select_var.set("Butterworth")
         self.option_filter_select_var.trace(mode = "w", callback = self.update_filter_view)
-        self.option_filter_select = tk.OptionMenu(self.master, self.option_filter_select_var, "Butterworth", "IIR Filter")
+        self.option_filter_select = tk.OptionMenu(self.master, self.option_filter_select_var, "Butterworth", "IIR Filter", "FIR Filter")
         self.option_filter_select.grid(row = 9, column = 1, sticky = "e")
 
         self.update_filter_view()
@@ -117,9 +118,9 @@ class FilterDesign_window(tk.Frame):
 
             self.view_butterworth["label_filter_cutoff_freq"] = tk.Label(self.master, text="Analog\n Cutoff\n Frequency (Hz):")
             self.view_butterworth["label_filter_cutoff_freq"].grid(row = 11, column = 0, pady = 5)
-            self.view_butterworth["entry_filter_cuttof_freq_var"] = tk.IntVar(self.master)
-            self.view_butterworth["entry_filter_cuttof_freq"] = tk.Entry(self.master, textvariable = self.view_butterworth["entry_filter_cuttof_freq_var"], justify = "right", width = 12)
-            self.view_butterworth["entry_filter_cuttof_freq"].grid(row = 11, column = 1, pady = 5, sticky = "e")
+            self.view_butterworth["entry_filter_cutoff_freq_var"] = tk.IntVar(self.master)
+            self.view_butterworth["entry_filter_cutoff_freq"] = tk.Entry(self.master, textvariable = self.view_butterworth["entry_filter_cutoff_freq_var"], justify = "right", width = 12)
+            self.view_butterworth["entry_filter_cutoff_freq"].grid(row = 11, column = 1, pady = 5, sticky = "e")
 
             self.view_butterworth["label_filter_sampling_rate"] = tk.Label(self.master, text="Sampling Rate\n(Hz):")
             self.view_butterworth["label_filter_sampling_rate"].grid(row = 12, column = 0, pady = 5)
@@ -186,6 +187,17 @@ class FilterDesign_window(tk.Frame):
             self.update_view_IIR_filter_P_coeff_list()
             self.update_view_IIR_filter_Q_coeff_list()
 
+        elif self.option_filter_select_var.get() == "FIR Filter":
+            self.next_row = 17
+            self.view_FIR["label_filter_type"] = tk.Label(self.master, text = "Type:")
+            self.view_FIR["label_filter_type"].grid(row = 10, column = 0, pady = 5)
+            self.view_FIR["option_filter_type_var"] = tk.StringVar(self.master)
+            self.view_FIR["option_filter_type_var"].set("Low Pass")
+            self.view_FIR["option_filter_type_var"].trace("w", self.update_view_FIR_filter)
+            self.view_FIR["option_filter_type"] = tk.OptionMenu(self.master, self.view_FIR["option_filter_type_var"], "Low Pass", "High Pass", "Band Pass")
+            self.view_FIR["option_filter_type"].grid(row = 10, column = 1, pady = 5, sticky = "e")
+
+            self.update_view_FIR_filter()
 
 
     def clear_filter_view(self, *args):
@@ -197,6 +209,11 @@ class FilterDesign_window(tk.Frame):
         for key in self.view_IIR:
             try:
                 self.view_IIR[key].destroy()
+            except Exception:
+                pass
+        for key in self.view_FIR:
+            try:
+                self.view_FIR[key].destroy()
             except Exception:
                 pass
 
@@ -230,6 +247,11 @@ class FilterDesign_window(tk.Frame):
             self.option_graph_2_var.set(self.option_graph_2_var_prev)
 
         self.canvas.draw()
+
+
+    """
+    IIR Filter view functions
+    """
 
     def update_view_IIR_filter_P_coeff_list(self, *args):
         menu = self.view_IIR["option_filter_P_coeffs_select"]['menu']
@@ -297,6 +319,78 @@ class FilterDesign_window(tk.Frame):
         self.IIR_filter_Q_coeffs[coeff_order] = coeff_value
 
 
+    """
+    FIR Filter view functions
+    """
+
+    def update_view_FIR_filter(self, *args):
+        for key in self.view_FIR:
+            if key != "option_filter_type" and key != "label_filter_type":
+                try:
+                    self.view_FIR[key].destroy()
+                except Exception:
+                    pass
+
+        if self.view_FIR["option_filter_type_var"].get() == "Low Pass" or self.view_FIR["option_filter_type_var"].get() == "High Pass":
+            self.view_FIR["label_filter_order"] = tk.Label(self.master, text = "Order:")
+            self.view_FIR["label_filter_order"].grid(row = 11, column = 0, pady = 5)
+            self.view_FIR["entry_filter_order_var"] = tk.IntVar(self.master)
+            self.view_FIR["entry_filter_order_var"].set(1)
+            self.view_FIR["entry_filter_order"] = tk.Entry(self.master, textvariable = self.view_FIR["entry_filter_order_var"], justify = "right", width = 5)
+            self.view_FIR["entry_filter_order"].grid(row = 11, column = 1, pady = 5, sticky = "e")
+
+            self.view_FIR["label_filter_cutoff_freq"] = tk.Label(self.master, text = "Analog\n Cutoff\n Frequency (Hz):")
+            self.view_FIR["label_filter_cutoff_freq"].grid(row = 12, column = 0, pady = 5)
+            self.view_FIR["entry_filter_cutoff_freq_var"] = tk.IntVar(self.master)
+            self.view_FIR["entry_filter_cutoff_freq"] = tk.Entry(self.master, textvariable = self.view_FIR["entry_filter_cutoff_freq_var"], justify = "right", width = 12)
+            self.view_FIR["entry_filter_cutoff_freq"].grid(row = 12, column = 1, pady = 5, sticky = "e")
+
+            self.view_FIR["label_filter_sampling_rate"] = tk.Label(self.master, text="Sampling Rate\n(Hz):")
+            self.view_FIR["label_filter_sampling_rate"].grid(row = 13, column = 0, pady = 5)
+            self.view_FIR["entry_filter_sampling_rate_var"] = tk.IntVar(self.master)
+            self.view_FIR["entry_filter_sampling_rate"] = tk.Entry(self.master, textvariable = self.view_FIR["entry_filter_sampling_rate_var"], justify = "right", width = 12)
+            self.view_FIR["entry_filter_sampling_rate"].grid(row = 13, column = 1, pady = 5, sticky = "e")
+
+            self.view_FIR["button_filter_apply"] = tk.Button(self.master, text = "Apply", command = self.button_FIR_filter_apply_click)
+            self.view_FIR["button_filter_apply"].grid(row = 14, column = 0, columnspan = 2, pady = 5, sticky = "ew")
+
+            self.view_FIR["label_apply_error"] = tk.Label(self.master)
+            self.view_FIR["label_apply_error"].grid(row = 15, column = 0, columnspan = 2)
+
+        elif self.view_FIR["option_filter_type_var"].get() == "Band Pass":
+            self.view_FIR["label_filter_order"] = tk.Label(self.master, text = "Order:")
+            self.view_FIR["label_filter_order"].grid(row = 11, column = 0, pady = 5)
+            self.view_FIR["entry_filter_order_var"] = tk.IntVar(self.master)
+            self.view_FIR["entry_filter_order_var"].set(1)
+            self.view_FIR["entry_filter_order"] = tk.Entry(self.master, textvariable = self.view_FIR["entry_filter_order_var"], justify = "right", width = 5)
+            self.view_FIR["entry_filter_order"].grid(row = 11, column = 1, pady = 5, sticky = "e")
+
+            self.view_FIR["label_filter_lower_cutoff_freq"] = tk.Label(self.master, text = "Analog\n Lower Cutoff\n Frequency (Hz):")
+            self.view_FIR["label_filter_lower_cutoff_freq"].grid(row = 12, column = 0, pady = 5)
+            self.view_FIR["entry_filter_lower_cutoff_freq_var"] = tk.IntVar(self.master)
+            self.view_FIR["entry_filter_lower_cutoff_freq"] = tk.Entry(self.master, textvariable = self.view_FIR["entry_filter_lower_cutoff_freq_var"], justify = "right", width = 12)
+            self.view_FIR["entry_filter_lower_cutoff_freq"].grid(row = 12, column = 1, pady = 5, sticky = "e")
+
+            self.view_FIR["label_filter_upper_cutoff_freq"] = tk.Label(self.master, text = "Analog\n Upper Cutoff\n Frequency (Hz):")
+            self.view_FIR["label_filter_upper_cutoff_freq"].grid(row = 13, column = 0, pady = 5)
+            self.view_FIR["entry_filter_upper_cutoff_freq_var"] = tk.IntVar(self.master)
+            self.view_FIR["entry_filter_upper_cutoff_freq"] = tk.Entry(self.master, textvariable = self.view_FIR["entry_filter_upper_cutoff_freq_var"], justify = "right", width = 12)
+            self.view_FIR["entry_filter_upper_cutoff_freq"].grid(row = 13, column = 1, pady = 5, sticky = "e")
+
+            self.view_FIR["label_filter_sampling_rate"] = tk.Label(self.master, text="Sampling Rate\n(Hz):")
+            self.view_FIR["label_filter_sampling_rate"].grid(row = 14, column = 0, pady = 5)
+            self.view_FIR["entry_filter_sampling_rate_var"] = tk.IntVar(self.master)
+            self.view_FIR["entry_filter_sampling_rate"] = tk.Entry(self.master, textvariable = self.view_FIR["entry_filter_sampling_rate_var"], justify = "right", width = 12)
+            self.view_FIR["entry_filter_sampling_rate"].grid(row = 14, column = 1, pady = 5, sticky = "e")
+
+            self.view_FIR["button_filter_apply"] = tk.Button(self.master, text = "Apply", command = self.button_FIR_filter_apply_click)
+            self.view_FIR["button_filter_apply"].grid(row = 15, column = 0, columnspan = 2, pady = 5, sticky = "ew")
+
+            self.view_FIR["label_apply_error"] = tk.Label(self.master)
+            self.view_FIR["label_apply_error"].grid(row = 16, column = 0, columnspan = 2, pady = 5)
+
+
+
     """Button click functions"""
     def button_import_data_click(self):
         data_path = tkf.askopenfilename()
@@ -341,7 +435,7 @@ class FilterDesign_window(tk.Frame):
             filter_parameters = {
                 "type": self.option_filter_select_var.get(),
                 "order": self.view_butterworth["option_filter_order_var"].get(),
-                "cutoff_freq": self.view_butterworth["entry_filter_cuttof_freq_var"].get(),
+                "cutoff_freq": self.view_butterworth["entry_filter_cutoff_freq_var"].get(),
                 "sampling_rate": self.view_butterworth["entry_filter_sampling_rate_var"].get(),
                 "dc_gain": self.view_butterworth["entry_filter_dc_gain_var"].get()
             }
@@ -389,6 +483,40 @@ class FilterDesign_window(tk.Frame):
 
         self.view_IIR["label_apply_error"]['text'] = "Filter Applied"
         self.view_IIR["label_apply_error"]['fg'] = "green"
+
+    def button_FIR_filter_apply_click(self):
+        if self.view_FIR["option_filter_type_var"].get() == "Band Pass":
+            lower_cutoff = self.view_FIR["entry_filter_lower_cutoff_freq_var"].get()
+            upper_cutoff = self.view_FIR["entry_filter_upper_cutoff_freq_var"].get()
+        else:
+            lower_cutoff = self.view_FIR["entry_filter_cutoff_freq_var"].get()
+            upper_cutoff = None
+
+        try:
+            filter_parameters = {
+            "type": self.option_filter_select_var.get(),
+            "FIR_type": self.view_FIR["option_filter_type_var"].get(),
+            "order": self.view_FIR["entry_filter_order_var"].get(),
+            "lower_cutoff_freq": lower_cutoff,
+            "upper_cutoff_freq": upper_cutoff,
+            "sampling_rate": self.view_FIR["entry_filter_sampling_rate_var"].get()
+            }
+        except tk.TclError as e:
+            self.view_FIR["label_apply_error"]['text'] = "Invalid Parameters."
+            self.view_FIR["label_apply_error"]['fg'] = "red"
+            return None
+
+        self.view_FIR["label_apply_error"]['text'] = ""
+
+        try:
+            self.controller.apply_filter(filter_parameters)
+        except ValueError as e:
+            print(e)
+            return None
+
+        self.update_plot_view()
+        self.view_FIR["label_apply_error"]['text'] = "Filter Applied"
+        self.view_FIR["label_apply_error"]['fg'] = "green"
 
 
     def check_import_data_byrow_click(self):
