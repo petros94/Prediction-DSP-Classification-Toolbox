@@ -1,4 +1,51 @@
 import numpy as np
+import scipy.signal as sc
+
+class FIR_filter:
+    def __init__(self, sampling_period, type, filter_order, analog_lower_cutoff_freq, analog_upper_cutoff_freq):
+        self.Ts = sampling_period
+        self.order = filter_order
+        self.analog_lower_cutoff_freq = analog_lower_cutoff_freq
+        self.analog_upper_cutoff_freq = analog_upper_cutoff_freq
+        self.type = type
+        self.filter_coeffs = []
+
+        self.calculate_filter_coeffs()
+
+    def calculate_filter_coeffs(self):
+        if self.type == "Low Pass":
+            self.filter_coeffs = sc.firwin(numtaps = self.order,
+                                           cutoff = self.analog_lower_cutoff_freq,
+                                           fs = 1/self.Ts
+                                           )
+
+        elif self.type == "High Pass":
+            self.filter_coeffs = sc.firwin(numtaps = self.order,
+                                           cutoff = self.analog_lower_cutoff_freq,
+                                           fs = 1/self.Ts,
+                                           pass_zero = False
+                                           )
+
+        elif self.type == "Band Pass":
+            self.filter_coeffs = sc.firwin(numtaps = self.order,
+                                           cutoff = [self.analog_lower_cutoff_freq, self.analog_upper_cutoff_freq],
+                                           fs = 1/self.Ts,
+                                           pass_zero = False
+                                           )
+
+        else:
+            raise ValueError("Invalid filter type.")
+            
+
+    def apply(self, data):
+        filtered_data = np.zeros(len(data))
+        for i in range(self.order, len(data)):
+            for k in range(self.order):
+                filtered_data[i] += self.filter_coeffs[k]*data[i-k]
+
+        return filtered_data[self.order:]
+
+
 
 class IIR_filter:
     def __init__(self, P_order, P_coefficients, Q_order, Q_coefficients):
