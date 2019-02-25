@@ -1,11 +1,11 @@
 # Prediction-DSP-Classification-Toolbox
 A collection of the most popular prediction techniques, implemented in python
 
-This project is a collection of DSP, timeseries analysis and machine learning packages, presented 
+This project is a collection of DSP, timeseries analysis and machine learning packages, presented
 in a single toolbox with an easy to use GUI.
 
-So far we've implemented some filter design techniques and the corresponding interface. 
-We ultimately aim to cover most of the algorithms used in ML today. The package up to this 
+So far we've implemented some filter design techniques and the corresponding interface.
+We ultimately aim to cover most of the algorithms used in ML today. The package up to this
 point includes:
 
 ### Filter Design Application ###
@@ -20,6 +20,9 @@ Export multiple things like filter parameters, plots, data after processing, etc
 * __Apply popular filters__: Apply Butterworth, IIR, FIR filters with the desired frequency response and sampling rate.
 
 * __Plot data__: Plot your data before and after filtering, as well as, the DFT and frequency response of the filter.
+
+### Screenshots ###
+![Alt text](Screenshots/window1.png?raw=true "Application Window")
 
 
 ### How to run the application ###
